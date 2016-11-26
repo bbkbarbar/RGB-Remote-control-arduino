@@ -51,9 +51,9 @@ unsigned long BTN_BRIGHTNESS_CHANGE = CODE_GREEN;
 unsigned short state = STATE_OFF;
 
 struct struct_color { 
-    int r;
-    int g;
-    int b;
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
 };
 typedef struct struct_color color;
 
