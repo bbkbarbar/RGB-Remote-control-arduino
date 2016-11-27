@@ -27,11 +27,12 @@ unsigned long CODE_LONG_PRESS =  4294967295;
 #define BTN_BRIGHTNESS_CHANGE CODE_BLUE
 
 //                                Brightness level definitions
-unsigned char brightnessLevels[] = {
-  20, // 0
-  50, // 1
-  80  // 2
+float brightnessLevels[] = {
+  0.1f, // 0  20%
+  0.5f, // 1  50%
+  0.9f  // 2  80%
 };
+
 
 #define MIN_BRIGHTNESS    0
 #define MAX_BRIGHTNESS    2
@@ -114,10 +115,17 @@ void setOutputs() {
   } else {    // Turn ON
     setColor(&current_color_id);
     /*
-    analogWrite(OUTPUT_RED,   getValueWithBrightness(current_color.r));
-    analogWrite(OUTPUT_GREEN, getValueWithBrightness(current_color.g));
-    analogWrite(OUTPUT_BLUE,  getValueWithBrightness(current_color.b));
+    analogWrite(OUTPUT_RED,   map(current_color.r, 0, 255, 0, brightnessLevels[currentBrightnessID]));
+    analogWrite(OUTPUT_GREEN, map(current_color.g, 0, 255, 0, brightnessLevels[currentBrightnessID]));
+    analogWrite(OUTPUT_BLUE,  map(current_color.b, 0, 255, 0, brightnessLevels[currentBrightnessID]));
     /**/
+
+    /*
+    analogWrite(OUTPUT_RED,   ((int)(current_color.r*brightnessLevels[currentBrightnessID])) );
+    analogWrite(OUTPUT_GREEN, ((int)(current_color.g*brightnessLevels[currentBrightnessID])) );
+    analogWrite(OUTPUT_BLUE,  ((int)(current_color.b*brightnessLevels[currentBrightnessID])) );
+    /**/
+    
     analogWrite(OUTPUT_RED,   current_color.r);
     analogWrite(OUTPUT_GREEN, current_color.g);
     analogWrite(OUTPUT_BLUE,  current_color.b);
@@ -151,6 +159,7 @@ void setup(){
   // init start state
   if(EEPROM.read(ADDR_COLOR_IS_STORED) == COLOR_IS_STORED){
     current_color_id = EEPROM.read(ADDR_COLOR_ID);
+    //current_color_id = COLOR_ID_WHITE;  
   }else{
     current_color_id = COLOR_ID_WHITE;  
   }
@@ -164,9 +173,10 @@ void setup(){
 
 void loop() {
   if (irrecv.decode(&results)) {
+    /*
     Serial.print("ColorID: ");
     Serial.print(current_color_id);
-    Serial.print(" ");
+    Serial.print(" ");/**/
 
     if (results.value == BTN_TOGGLE) { // need to turn ON or OFF
       results.value = 0;
@@ -195,6 +205,10 @@ void loop() {
       results.value = 0;
       if(state == STATE_ON){ // we need to change brightness only in ON state
         changeBrightness();
+        char* str = "Brightness:  ";
+        str[11] = '0' + currentBrightnessID;
+        Serial.print(str);
+        Serial.print(" ");
       }
     }
     
